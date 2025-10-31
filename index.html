@@ -36,6 +36,7 @@
     padding: 0.6rem;
     border-radius: 0.6rem;
     border: 1px solid #ccc;
+    box-sizing: border-box;
   }
 
   button {
@@ -78,27 +79,27 @@
   }
 
   .consume-input {
-    width: 3.5rem;
+    width: 60px;
     text-align: center;
   }
 
   .input-row {
     display: flex;
-    gap: 0.4rem;
+    gap: 5px;
     margin-bottom: 1rem;
     flex-wrap: nowrap;
   }
 
   .input-row input[type="text"] {
-    flex: 0 0 20%;
+    width: 150px; /* 食品名幅固定 */
   }
 
   .input-row input[type="number"] {
-    flex: 0 0 10%;
+    width: 60px; /* 個数幅固定 */
   }
 
   .input-row button {
-    flex: 0 0 5%;
+    width: 80px; /* 追加ボタン幅固定 */
   }
 
   .empty {
@@ -120,6 +121,7 @@
   #login input {
     margin-bottom: 1rem;
     width: 200px;
+    padding: 0.6rem;
   }
 </style>
 </head>
@@ -149,7 +151,7 @@
 
 <script>
   // 🔒 簡易パスワード
-  const correctPassword = "4152";
+  const correctPassword = "abcd";
 
   function checkPassword() {
     const pw = document.getElementById("password").value;
