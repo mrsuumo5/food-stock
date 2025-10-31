@@ -53,7 +53,7 @@
 
   .food-item {
     background: white;
-    padding: 1rem;
+    padding: 0.8rem 1rem;
     border-radius: 1rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     margin-bottom: 1rem;
@@ -61,7 +61,6 @@
 
   .food-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
   }
 
@@ -74,6 +73,21 @@
     font-weight: bold;
     margin-left: 1rem;
     white-space: nowrap;
+  }
+
+  .delete-btn {
+    background: #FF6B6B;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    margin-left: auto;
+  }
+
+  .delete-btn:hover {
+    background: #E03E3E;
   }
 
   .actions {
@@ -134,20 +148,6 @@
     padding: 0.6rem;
   }
 
-  .delete-btn {
-    background: #FF6B6B;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.4rem 0.6rem;
-    border-radius: 0.5rem;
-    font-size: 0.9rem;
-    margin-left: auto; /* 右端に配置 */
-  }
-
-  .delete-btn:hover {
-    background: #E03E3E;
-  }
 </style>
 </head>
 <body>
@@ -178,139 +178,139 @@
 </div>
 
 <script>
-  const correctPassword = "rrrr";
+const correctPassword = "rrrr";
 
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById("password").focus();
-  });
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById("password").focus();
+});
 
-  function checkPassword() {
-    const pw = document.getElementById("password").value;
-    if(pw === correctPassword){
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-    } else {
-      alert("パスワードが違います");
-    }
+function checkPassword() {
+  const pw = document.getElementById("password").value;
+  if(pw === correctPassword){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } else {
+    alert("パスワードが違います");
+  }
+}
+
+let foods = JSON.parse(localStorage.getItem("foods") || "[]");
+let history = JSON.parse(localStorage.getItem("history") || "[]");
+
+function addFood() {
+  const nameInput = document.getElementById("foodName");
+  const countInput = document.getElementById("foodCount");
+  let name = nameInput.value.trim();
+  const count = parseFloat(countInput.value);
+
+  if (!name || isNaN(count) || count <= 0) {
+    alert("食品名と個数を正しく入力してください。");
+    return;
   }
 
-  let foods = JSON.parse(localStorage.getItem("foods") || "[]");
-  let history = JSON.parse(localStorage.getItem("history") || "[]");
+  const date = new Date();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  name = `${name} (${mm}/${dd})`;
 
-  function addFood() {
-    const nameInput = document.getElementById("foodName");
-    const countInput = document.getElementById("foodCount");
-    let name = nameInput.value.trim();
-    const count = parseFloat(countInput.value);
+  foods.push({ name, count: parseFloat(count.toFixed(1)), remaining: parseFloat(count.toFixed(1)) });
+  saveData();
+  renderLists();
 
-    if (!name || isNaN(count) || count <= 0) {
-      alert("食品名と個数を正しく入力してください。");
-      return;
-    }
+  nameInput.value = "";
+  countInput.value = "";
+  nameInput.blur();
+  countInput.blur();
+}
 
-    const date = new Date();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    name = `${name} (${mm}/${dd})`;
+function consumeFood(index) {
+  const amount = parseFloat(document.getElementById(`consume-${index}`).value);
+  if (isNaN(amount) || amount <= 0) {
+    alert("消費数を入力してください。");
+    return;
+  }
+  if (foods[index].remaining - amount < 0) {
+    alert("残数が足りません。");
+    return;
+  }
 
-    foods.push({ name, count: parseFloat(count.toFixed(1)), remaining: parseFloat(count.toFixed(1)) });
+  foods[index].remaining = parseFloat((foods[index].remaining - amount).toFixed(1));
+
+  if (foods[index].remaining === 0) {
+    history.push(foods[index]);
+    foods.splice(index, 1);
+  }
+
+  saveData();
+  renderLists();
+}
+
+function deleteFood(index) {
+  if (confirm("削除しますか？")) {
+    foods.splice(index, 1);
     saveData();
     renderLists();
-
-    nameInput.value = "";
-    countInput.value = "";
-    nameInput.blur();
-    countInput.blur();
   }
+}
 
-  function consumeFood(index) {
-    const amount = parseFloat(document.getElementById(`consume-${index}`).value);
-    if (isNaN(amount) || amount <= 0) {
-      alert("消費数を入力してください。");
-      return;
-    }
-    if (foods[index].remaining - amount < 0) {
-      alert("残数が足りません。");
-      return;
-    }
-
-    foods[index].remaining = parseFloat((foods[index].remaining - amount).toFixed(1));
-
-    if (foods[index].remaining === 0) {
-      history.push(foods[index]);
-      foods.splice(index, 1);
-    }
-
+function deleteHistory(index) {
+  if (confirm("履歴から削除しますか？")) {
+    history.splice(index, 1);
     saveData();
     renderLists();
   }
+}
 
-  function deleteFood(index) {
-    if (confirm("削除しますか？")) {
-      foods.splice(index, 1);
-      saveData();
-      renderLists();
-    }
+function saveData() {
+  localStorage.setItem("foods", JSON.stringify(foods));
+  localStorage.setItem("history", JSON.stringify(history));
+}
+
+function renderLists() {
+  const list = document.getElementById("foodList");
+  list.innerHTML = "";
+  if (foods.length === 0) {
+    list.innerHTML = '<div class="empty">登録された食品はありません。</div>';
+  } else {
+    foods.forEach((food, i) => {
+      const remainingText = food.remaining.toFixed(1).replace(/\.0$/, '');
+      const div = document.createElement("div");
+      div.className = "food-item";
+      div.innerHTML = `
+        <div class="food-header">
+          <div class="food-name">${food.name}</div>
+          <div class="remaining">残り ${remainingText} / ${food.count}</div>
+          <button class="delete-btn" onclick="deleteFood(${i})">削除</button>
+        </div>
+        <div class="actions">
+          <input type="number" id="consume-${i}" class="consume-input" min="0.1" step="0.1" placeholder="消費">
+          <button onclick="consumeFood(${i})">消費</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
   }
 
-  function deleteHistory(index) {
-    if (confirm("履歴から削除しますか？")) {
-      history.splice(index, 1);
-      saveData();
-      renderLists();
-    }
+  const historyDiv = document.getElementById("historyList");
+  historyDiv.innerHTML = "";
+  if (history.length === 0) {
+    historyDiv.innerHTML = '<div class="empty">履歴はありません。</div>';
+  } else {
+    history.forEach((item, i) => {
+      const div = document.createElement("div");
+      div.className = "food-item";
+      div.innerHTML = `
+        <div class="food-header">
+          <div class="food-name">${item.name}（消費済）</div>
+          <button class="delete-btn" onclick="deleteHistory(${i})">削除</button>
+        </div>
+      `;
+      historyDiv.appendChild(div);
+    });
   }
+}
 
-  function saveData() {
-    localStorage.setItem("foods", JSON.stringify(foods));
-    localStorage.setItem("history", JSON.stringify(history));
-  }
-
-  function renderLists() {
-    const list = document.getElementById("foodList");
-    list.innerHTML = "";
-    if (foods.length === 0) {
-      list.innerHTML = '<div class="empty">登録された食品はありません。</div>';
-    } else {
-      foods.forEach((food, i) => {
-        const remainingText = food.remaining.toFixed(1).replace(/\.0$/, '');
-        const div = document.createElement("div");
-        div.className = "food-item";
-        div.innerHTML = `
-          <div class="food-header">
-            <div class="food-name">${food.name}</div>
-            <div class="remaining">残り ${remainingText} / ${food.count}</div>
-            <button class="delete-btn" onclick="deleteFood(${i})">削除</button>
-          </div>
-          <div class="actions">
-            <input type="number" id="consume-${i}" class="consume-input" min="0.1" step="0.1" placeholder="消費">
-            <button onclick="consumeFood(${i})">消費</button>
-          </div>
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    const historyDiv = document.getElementById("historyList");
-    historyDiv.innerHTML = "";
-    if (history.length === 0) {
-      historyDiv.innerHTML = '<div class="empty">履歴はありません。</div>';
-    } else {
-      history.forEach((item, i) => {
-        const div = document.createElement("div");
-        div.className = "food-item";
-        div.innerHTML = `
-          <div class="food-header">
-            <div class="food-name">${item.name}（消費済）</div>
-            <button class="delete-btn" onclick="deleteHistory(${i})">削除</button>
-          </div>
-        `;
-        historyDiv.appendChild(div);
-      });
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", renderLists);
+document.addEventListener("DOMContentLoaded", renderLists);
 </script>
 
 </body>
