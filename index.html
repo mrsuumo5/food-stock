@@ -59,10 +59,6 @@
     margin-bottom: 1rem;
   }
 
-  .food-item.out-of-stock {
-    opacity: 0.5;
-  }
-
   .food-header {
     display: flex;
     justify-content: space-between;
@@ -95,11 +91,11 @@
   }
 
   .input-row input[type="text"] {
-    width: 140px; /* 食品名幅固定 */
+    width: 200px; /* 食品名幅固定 */
   }
 
   .input-row input[type="number"] {
-    width: 50px; /* 個数幅固定 */
+    width: 60px; /* 個数幅固定 */
   }
 
   .input-row button {
@@ -109,7 +105,13 @@
   .empty {
     text-align: center;
     color: #777;
-    padding: 2rem;
+    padding: 1rem 0;
+  }
+
+  h2 {
+    margin-top: 2rem;
+    font-size: 1.2rem;
+    color: #555;
   }
 
   /* 簡易ログイン画面 */
@@ -143,18 +145,23 @@
   </header>
 
   <div class="container">
+    <!-- 新規追加 -->
     <div class="input-row">
       <input type="text" id="foodName" placeholder="食品名">
       <input type="number" id="foodCount" placeholder="個数" min="1">
       <button onclick="addFood()">追加</button>
     </div>
 
+    <!-- 現在の食品リスト -->
     <div id="foodList"></div>
+
+    <!-- 履歴 -->
+    <h2>消費済み履歴</h2>
+    <div id="historyList"></div>
   </div>
 </div>
 
 <script>
-  // 🔒 簡易パスワード
   const correctPassword = "rrrr";
 
   function checkPassword() {
@@ -167,9 +174,10 @@
     }
   }
 
-  // 食品管理
+  // データ管理
   let foods = JSON.parse(localStorage.getItem("foods") || "[]");
-  
+  let history = JSON.parse(localStorage.getItem("history") || "[]");
+
   function addFood() {
     const nameInput = document.getElementById("foodName");
     const countInput = document.getElementById("foodCount");
@@ -189,9 +197,8 @@
 
     foods.push({ name, count, remaining: count });
     saveData();
-    renderFoods();
+    renderLists();
 
-    // 入力欄をクリア＆キーボード閉じる
     nameInput.value = "";
     countInput.value = "";
     nameInput.blur();
@@ -208,54 +215,74 @@
       alert("残数が足りません。");
       return;
     }
+
     foods[index].remaining -= amount;
+
+    // 残数0になったら履歴へ移動
+    if (foods[index].remaining === 0) {
+      history.push(foods[index]);
+      foods.splice(index, 1);
+    }
+
     saveData();
-    renderFoods();
+    renderLists();
   }
 
   function deleteFood(index) {
     if (confirm("削除しますか？")) {
       foods.splice(index, 1);
       saveData();
-      renderFoods();
+      renderLists();
     }
   }
 
   function saveData() {
     localStorage.setItem("foods", JSON.stringify(foods));
+    localStorage.setItem("history", JSON.stringify(history));
   }
 
-  function renderFoods() {
+  function renderLists() {
     const list = document.getElementById("foodList");
     list.innerHTML = "";
-
     if (foods.length === 0) {
       list.innerHTML = '<div class="empty">登録された食品はありません。</div>';
-      return;
+    } else {
+      foods.forEach((food, i) => {
+        const div = document.createElement("div");
+        div.className = "food-item";
+        div.innerHTML = `
+          <div class="food-header">
+            <span class="food-name">${food.name}</span>
+            <span>残り ${food.remaining} / ${food.count}</span>
+          </div>
+          <div class="actions">
+            <div>
+              <input type="number" id="consume-${i}" class="consume-input" min="1" placeholder="消費">
+              <button onclick="consumeFood(${i})">消費</button>
+            </div>
+            <button style="background:#FF6B6B;" onclick="deleteFood(${i})">削除</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
     }
 
-    foods.forEach((food, i) => {
-      const div = document.createElement("div");
-      div.className = "food-item" + (food.remaining === 0 ? " out-of-stock" : "");
-      div.innerHTML = `
-        <div class="food-header">
-          <span class="food-name">${food.name}</span>
-          <span>残り ${food.remaining} / ${food.count}</span>
-        </div>
-        <div class="actions">
-          <div>
-            <input type="number" id="consume-${i}" class="consume-input" min="1" placeholder="消費">
-            <button onclick="consumeFood(${i})">消費</button>
-          </div>
-          <button style="background:#FF6B6B;" onclick="deleteFood(${i})">削除</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
+    // 履歴表示
+    const historyDiv = document.getElementById("historyList");
+    historyDiv.innerHTML = "";
+    if (history.length === 0) {
+      historyDiv.innerHTML = '<div class="empty">履歴はありません。</div>';
+    } else {
+      history.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "food-item";
+        div.innerHTML = `<div class="food-name">${item.name}（消費済）</div>`;
+        historyDiv.appendChild(div);
+      });
+    }
   }
 
-  // 初期描画
-  document.addEventListener("DOMContentLoaded", renderFoods);
+  document.addEventListener("DOMContentLoaded", renderLists);
 </script>
 
 </body>
