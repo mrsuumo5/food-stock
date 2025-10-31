@@ -59,6 +59,10 @@
     margin-bottom: 1rem;
   }
 
+  .food-item.out-of-stock {
+    opacity: 0.5;
+  }
+
   .food-header {
     display: flex;
     justify-content: space-between;
@@ -91,15 +95,15 @@
   }
 
   .input-row input[type="text"] {
-    width: 150px; /* 食品名幅固定 */
+    width: 140px; /* 食品名幅固定 */
   }
 
   .input-row input[type="number"] {
-    width: 60px; /* 個数幅固定 */
+    width: 50px; /* 個数幅固定 */
   }
 
   .input-row button {
-    width: 80px; /* 追加ボタン幅固定 */
+    width: 60px; /* 追加ボタン幅固定 */
   }
 
   .empty {
@@ -151,7 +155,7 @@
 
 <script>
   // 🔒 簡易パスワード
-  const correctPassword = "abcd";
+  const correctPassword = "rrrr";
 
   function checkPassword() {
     const pw = document.getElementById("password").value;
@@ -169,13 +173,19 @@
   function addFood() {
     const nameInput = document.getElementById("foodName");
     const countInput = document.getElementById("foodCount");
-    const name = nameInput.value.trim();
+    let name = nameInput.value.trim();
     const count = parseInt(countInput.value);
 
     if (!name || isNaN(count) || count <= 0) {
       alert("食品名と個数を正しく入力してください。");
       return;
     }
+
+    // 日付を mm/dd 形式で追加
+    const date = new Date();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    name = `${name} (${mm}/${dd})`;
 
     foods.push({ name, count, remaining: count });
     saveData();
@@ -226,7 +236,7 @@
 
     foods.forEach((food, i) => {
       const div = document.createElement("div");
-      div.className = "food-item";
+      div.className = "food-item" + (food.remaining === 0 ? " out-of-stock" : "");
       div.innerHTML = `
         <div class="food-header">
           <span class="food-name">${food.name}</span>
