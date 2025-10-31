@@ -129,6 +129,21 @@
     width: 200px;
     padding: 0.6rem;
   }
+
+  .history-delete {
+    background: #FF6B6B;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+  }
+
+  .history-delete:hover {
+    background: #E03E3E;
+  }
 </style>
 </head>
 <body>
@@ -240,6 +255,14 @@
     }
   }
 
+  function deleteHistory(index) {
+    if (confirm("履歴から削除しますか？")) {
+      history.splice(index, 1);
+      saveData();
+      renderLists();
+    }
+  }
+
   function saveData() {
     localStorage.setItem("foods", JSON.stringify(foods));
     localStorage.setItem("history", JSON.stringify(history));
@@ -277,10 +300,13 @@
     if (history.length === 0) {
       historyDiv.innerHTML = '<div class="empty">履歴はありません。</div>';
     } else {
-      history.forEach(item => {
+      history.forEach((item, i) => {
         const div = document.createElement("div");
         div.className = "food-item";
-        div.innerHTML = `<div class="food-name">${item.name}（消費済）</div>`;
+        div.innerHTML = `
+          <div class="food-name">${item.name}（消費済）</div>
+          <button class="history-delete" onclick="deleteHistory(${i})">削除</button>
+        `;
         historyDiv.appendChild(div);
       });
     }
