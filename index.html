@@ -57,9 +57,6 @@
     border-radius: 1rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 
   .food-name {
@@ -71,6 +68,7 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    margin-top: 0.5rem;
   }
 
   .consume-input {
@@ -109,7 +107,6 @@
     color: #555;
   }
 
-  /* 簡易ログイン画面 */
   #login {
     display: flex;
     flex-direction: column;
@@ -137,6 +134,12 @@
 
   .delete-btn:hover {
     background: #E03E3E;
+  }
+
+  .remaining {
+    text-align: right;
+    margin-top: 0.5rem;
+    font-weight: bold;
   }
 </style>
 </head>
@@ -263,10 +266,7 @@
       list.innerHTML = '<div class="empty">登録された食品はありません。</div>';
     } else {
       foods.forEach((food, i) => {
-        const remainingText = food.remaining % 1 === 0 
-          ? food.remaining.toFixed(0) 
-          : food.remaining.toFixed(1);
-
+        const remainingText = food.remaining.toFixed(1).replace(/\.0$/, '');
         const div = document.createElement("div");
         div.className = "food-item";
         div.innerHTML = `
@@ -276,6 +276,7 @@
             <button onclick="consumeFood(${i})">消費</button>
             <button class="delete-btn" onclick="deleteFood(${i})">削除</button>
           </div>
+          <div class="remaining">残り ${remainingText} / ${food.count}</div>
         `;
         list.appendChild(div);
       });
