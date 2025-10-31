@@ -57,9 +57,6 @@
     border-radius: 1rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     margin-bottom: 1rem;
-  }
-
-  .food-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -71,11 +68,9 @@
   }
 
   .actions {
-    margin-top: 0.5rem;
     display: flex;
-    justify-content: space-between;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    align-items: center;
   }
 
   .consume-input {
@@ -130,7 +125,7 @@
     padding: 0.6rem;
   }
 
-  .history-delete {
+  .delete-btn {
     background: #FF6B6B;
     border: none;
     color: white;
@@ -138,10 +133,9 @@
     padding: 0.4rem 0.6rem;
     border-radius: 0.5rem;
     font-size: 0.9rem;
-    margin-left: 0.5rem;
   }
 
-  .history-delete:hover {
+  .delete-btn:hover {
     background: #E03E3E;
   }
 </style>
@@ -160,17 +154,14 @@
   </header>
 
   <div class="container">
-    <!-- 新規追加 -->
     <div class="input-row">
       <input type="text" id="foodName" placeholder="食品名">
       <input type="number" id="foodCount" placeholder="個数" min="0.1" step="0.1">
       <button onclick="addFood()">追加</button>
     </div>
 
-    <!-- 現在の食品リスト -->
     <div id="foodList"></div>
 
-    <!-- 履歴 -->
     <h2>消費済み履歴</h2>
     <div id="historyList"></div>
   </div>
@@ -179,7 +170,6 @@
 <script>
   const correctPassword = "rrrr";
 
-  // ページロード時にパスワード欄選択
   window.addEventListener('DOMContentLoaded', () => {
     document.getElementById("password").focus();
   });
@@ -194,7 +184,6 @@
     }
   }
 
-  // データ管理
   let foods = JSON.parse(localStorage.getItem("foods") || "[]");
   let history = JSON.parse(localStorage.getItem("history") || "[]");
 
@@ -209,7 +198,6 @@
       return;
     }
 
-    // 日付 mm/dd 形式で追加
     const date = new Date();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
@@ -275,26 +263,24 @@
       list.innerHTML = '<div class="empty">登録された食品はありません。</div>';
     } else {
       foods.forEach((food, i) => {
+        const remainingText = food.remaining % 1 === 0 
+          ? food.remaining.toFixed(0) 
+          : food.remaining.toFixed(1);
+
         const div = document.createElement("div");
         div.className = "food-item";
         div.innerHTML = `
-          <div class="food-header">
-            <span class="food-name">${food.name}</span>
-            <span>残り ${food.remaining.toFixed(1)} / ${food.count.toFixed(1)}</span>
-          </div>
+          <div class="food-name">${food.name}</div>
           <div class="actions">
-            <div>
-              <input type="number" id="consume-${i}" class="consume-input" min="0.1" step="0.1" placeholder="消費">
-              <button onclick="consumeFood(${i})">消費</button>
-            </div>
-            <button style="background:#FF6B6B;" onclick="deleteFood(${i})">削除</button>
+            <input type="number" id="consume-${i}" class="consume-input" min="0.1" step="0.1" placeholder="消費">
+            <button onclick="consumeFood(${i})">消費</button>
+            <button class="delete-btn" onclick="deleteFood(${i})">削除</button>
           </div>
         `;
         list.appendChild(div);
       });
     }
 
-    // 履歴表示
     const historyDiv = document.getElementById("historyList");
     historyDiv.innerHTML = "";
     if (history.length === 0) {
@@ -305,7 +291,9 @@
         div.className = "food-item";
         div.innerHTML = `
           <div class="food-name">${item.name}（消費済）</div>
-          <button class="history-delete" onclick="deleteHistory(${i})">削除</button>
+          <div class="actions">
+            <button class="delete-btn" onclick="deleteHistory(${i})">削除</button>
+          </div>
         `;
         historyDiv.appendChild(div);
       });
