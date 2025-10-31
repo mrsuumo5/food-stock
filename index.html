@@ -90,15 +90,15 @@
   }
 
   .input-row input[type="text"] {
-    flex: 0 0 50%;
+    flex: 0 0 40%;
   }
 
   .input-row input[type="number"] {
-    flex: 0 0 20%;
+    flex: 0 0 15%;
   }
 
   .input-row button {
-    flex: 0 0 30%;
+    flex: 0 0 25%;
   }
 
   .empty {
@@ -107,28 +107,63 @@
     padding: 2rem;
   }
 
+  /* 簡易ログイン画面 */
+  #login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #f7f8fa;
+  }
+
+  #login input {
+    margin-bottom: 1rem;
+    width: 200px;
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>食品メモ＆在庫管理</h1>
-</header>
+<div id="login">
+  <h2>パスワードを入力してください</h2>
+  <input type="password" id="password" placeholder="パスワード">
+  <button onclick="checkPassword()">ログイン</button>
+</div>
 
-<div class="container">
-  <div class="input-row">
-    <input type="text" id="foodName" placeholder="食品名">
-    <input type="number" id="foodCount" placeholder="個数" min="1">
-    <button onclick="addFood()">追加</button>
+<div id="app" style="display:none;">
+  <header>
+    <h1>食品メモ＆在庫管理</h1>
+  </header>
+
+  <div class="container">
+    <div class="input-row">
+      <input type="text" id="foodName" placeholder="食品名">
+      <input type="number" id="foodCount" placeholder="個数" min="1">
+      <button onclick="addFood()">追加</button>
+    </div>
+
+    <div id="foodList"></div>
   </div>
-
-  <div id="foodList"></div>
 </div>
 
 <script>
-  let foods = JSON.parse(localStorage.getItem("foods") || "[]");
-  renderFoods();
+  // 🔒 簡易パスワード
+  const correctPassword = "4152";
 
+  function checkPassword() {
+    const pw = document.getElementById("password").value;
+    if(pw === correctPassword){
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+    } else {
+      alert("パスワードが違います");
+    }
+  }
+
+  // 食品管理
+  let foods = JSON.parse(localStorage.getItem("foods") || "[]");
+  
   function addFood() {
     const nameInput = document.getElementById("foodName");
     const countInput = document.getElementById("foodCount");
@@ -168,9 +203,9 @@
 
   function deleteFood(index) {
     if (confirm("削除しますか？")) {
-      foods.splice(index, 1); // 即削除
+      foods.splice(index, 1);
       saveData();
-      renderFoods(); // 即描画
+      renderFoods();
     }
   }
 
@@ -206,6 +241,9 @@
       list.appendChild(div);
     });
   }
+
+  // 初期描画
+  document.addEventListener("DOMContentLoaded", renderFoods);
 </script>
 
 </body>
