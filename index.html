@@ -138,32 +138,11 @@
     color: #555;
   }
 
-  #login {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: #f7f8fa;
-  }
-
-  #login input {
-    margin-bottom: 1rem;
-    width: 200px;
-    padding: 0.6rem;
-  }
-
 </style>
 </head>
 <body>
 
-<div id="login">
-  <h2>パスワードを入力してください</h2>
-  <input type="password" id="password" placeholder="パスワード">
-  <button onclick="checkPassword()">ログイン</button>
-</div>
-
-<div id="app" style="display:none;">
+<div id="app">
   <header>
     <h1>食品メモ＆在庫管理</h1>
   </header>
@@ -183,22 +162,6 @@
 </div>
 
 <script>
-const correctPassword = "rrrr";
-
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById("password").focus();
-});
-
-function checkPassword() {
-  const pw = document.getElementById("password").value;
-  if(pw === correctPassword){
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-  } else {
-    alert("パスワードが違います");
-  }
-}
-
 let foods = JSON.parse(localStorage.getItem("foods") || "[]");
 let history = JSON.parse(localStorage.getItem("history") || "[]");
 
